@@ -27,7 +27,8 @@ struct Node {
 	std::vector<Node> children;
 };
 
-Node rootNode;
+std::vector<Node> parentNodes;
+Node rootNode, rootNode2;
 
 void DrawNode(const Node& node) {
 	ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
@@ -50,7 +51,10 @@ void DrawNode(const Node& node) {
 
 void RenderScene() {
 	// render the scene graph
-	DrawNode(rootNode);
+	for (const auto& parent : parentNodes)
+	{
+		DrawNode(parent);
+	}
 }
 //------------------------------------------SCENE GRAPH------------------------------------------
 GLuint createShaderProgram()
@@ -151,16 +155,28 @@ int main(void)
 
 
 	// create the scene graph nodes
-	rootNode.name = "Root";
+	rootNode.name = "Root1";
 	rootNode.transform = glm::mat4(1.0f);
+	rootNode2.name = "Root2";
+	rootNode2.transform = glm::mat4(1.0f);
+
+	// Create children nodes
 	Node child1;
-	child1.name = "Child 1";
+	child1.name = "Child object 1";
 	child1.transform = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	rootNode.children.push_back(child1);
 	Node child2;
-	child2.name = "Child 2";
+	child2.name = "Child object 2";
 	child2.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
 	rootNode.children.push_back(child2);
+	Node child3;
+	child3.name = "Child object 3";
+	child3.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+	rootNode2.children.push_back(child3);
+
+	// Parent nodes must be pushed back after all children
+	parentNodes.push_back(rootNode);	
+	parentNodes.push_back(rootNode2);
 
 	while (!glfwWindowShouldClose(window))
 	{

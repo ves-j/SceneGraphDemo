@@ -19,39 +19,60 @@ using namespace std;
 
 GLuint renderingProgram;
 GLuint vao[numVAOs];
-
 //------------------------------------------SCENE GRAPH------------------------------------------
 struct Node {
 	std::string name;
-	glm::mat4 transform;
+	//glm::mat4 transform;
+	glm::vec3 pos;
 	std::vector<Node> children;
 };
 
 std::vector<Node> parentNodes;
 Node rootNode, rootNode2;
 
-void DrawNode(const Node& node) {
+void DrawNode(Node& node) {
 	ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 	bool node_open = ImGui::TreeNodeEx(node.name.c_str(), node_flags);
 	if (ImGui::IsItemClicked()) {
 		// do something when the node is clicked
 	}
 	if (node_open) {
-		for (const auto& child : node.children) {
-			DrawNode(child);
-		}
-		// Show properties of this node
-		if (node.children.empty()) {
-			ImGui::Text("Node Properties");
+		for (auto& child : node.children) {
+			ImGui::PushID(&child);
+			bool child_node_open = ImGui::TreeNodeEx(child.name.c_str(), node_flags);
+
+			if (ImGui::IsItemClicked()) {
+				// do something when the child node is clicked
+			}
+
+			if (child_node_open) {
+
+				ImGui::Text("Child Properties");
+				ImGui::SliderFloat("X", &child.pos.x, -1.0f, 1.0f);
+				
+				ImGui::TreePop();
+			}
+
+			ImGui::PopID();
 		}
 
 		ImGui::TreePop();
 	}
+	
+	for (const auto& child : node.children) 
+	{
+		glUseProgram(renderingProgram);
+		glPointSize(30.0f);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDrawArrays(GL_POINTS, 0, 1);
+		glUniform3f(glad_glGetUniformLocation(renderingProgram, "aPos"), child.pos.x, child.pos.y, child.pos.z);
+	}
+
 }
 
 void RenderScene() {
 	// render the scene graph
-	for (const auto& parent : parentNodes)
+	for (auto& parent : parentNodes)
 	{
 		DrawNode(parent);
 	}
@@ -155,23 +176,26 @@ int main(void)
 
 
 	// create the scene graph nodes
-	rootNode.name = "Root1";
-	rootNode.transform = glm::mat4(1.0f);
-	rootNode2.name = "Root2";
-	rootNode2.transform = glm::mat4(1.0f);
+	rootNode.name = "Parent object 1";
+	//rootNode.transform = glm::mat4(1.0f);
+	rootNode2.name = "Parent object 2";
+	//rootNode2.transform = glm::mat4(1.0f);
 
 	// Create children nodes
 	Node child1;
 	child1.name = "Child object 1";
-	child1.transform = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	//child1.transform = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	child1.pos = glm::vec3(0.5f, 0.0f, 0.0f);
 	rootNode.children.push_back(child1);
 	Node child2;
 	child2.name = "Child object 2";
-	child2.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+	//child2.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+	child2.pos = glm::vec3(0.0f, 0.0f, 0.0f);
 	rootNode.children.push_back(child2);
 	Node child3;
 	child3.name = "Child object 3";
-	child3.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+	//child3.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+	child3.pos = glm::vec3(-0.5f, 0.0f, 0.0f);
 	rootNode2.children.push_back(child3);
 
 	// Parent nodes must be pushed back after all children
@@ -188,7 +212,7 @@ int main(void)
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		display(window, glfwGetTime());
+		//display(window, glfwGetTime());
 
 		// render the scene
 		RenderScene();

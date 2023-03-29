@@ -7,13 +7,13 @@ P.S 2 I played around a little bit and realised that something was missing, it l
 
     |_ Parent
 
-         |_ child
+      |_ child
          
-               |_ grandchild
+        |_ grandchild
                  
-                        |_ great grandchild
+          |_ great grandchild
                               
-                                   |_ ...
+            |_ ...
 
 
 

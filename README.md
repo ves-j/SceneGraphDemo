@@ -11,7 +11,7 @@ P.S 2 I played around a little bit and realised that something was missing, it l
          
                |_ grandchild
                  
-                        |_ grand grandchild
+                        |_ great grandchild
                               
                                    |_ ...
 

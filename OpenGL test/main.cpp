@@ -23,12 +23,14 @@ GLuint vao[numVAOs];
 struct Node {
 	std::string name;
 	//glm::mat4 transform;
-	glm::vec3 pos;
+	glm::vec3 pos = glm::vec3(0.0f);
 	std::vector<Node> children;
 };
 
 std::vector<Node> parentNodes;
+std::vector<Node> totalDecendants;
 Node rootNode, rootNode2;
+
 
 void DrawNode(Node& node) {
 	ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
@@ -41,6 +43,7 @@ void DrawNode(Node& node) {
 			ImGui::PushID(&child);
 			bool child_node_open = ImGui::TreeNodeEx(child.name.c_str(), node_flags);
 
+
 			if (ImGui::IsItemClicked()) {
 				// do something when the child node is clicked
 			}
@@ -49,17 +52,21 @@ void DrawNode(Node& node) {
 
 				ImGui::Text("Child Properties");
 				ImGui::SliderFloat("X", &child.pos.x, -1.0f, 1.0f);
+
+				DrawNode(child);
 				
+
 				ImGui::TreePop();
 			}
 
 			ImGui::PopID();
+
 		}
 
 		ImGui::TreePop();
 	}
 	
-	for (const auto& child : node.children) 
+	for (auto& child : node.children)
 	{
 		glUseProgram(renderingProgram);
 		glPointSize(30.0f);
@@ -67,7 +74,6 @@ void DrawNode(Node& node) {
 		glDrawArrays(GL_POINTS, 0, 1);
 		glUniform3f(glad_glGetUniformLocation(renderingProgram, "aPos"), child.pos.x, child.pos.y, child.pos.z);
 	}
-
 }
 
 void RenderScene() {
@@ -177,30 +183,49 @@ int main(void)
 
 	// create the scene graph nodes
 	rootNode.name = "Parent object 1";
-	//rootNode.transform = glm::mat4(1.0f);
 	rootNode2.name = "Parent object 2";
-	//rootNode2.transform = glm::mat4(1.0f);
 
 	// Create children nodes
 	Node child1;
 	child1.name = "Child object 1";
-	//child1.transform = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	child1.pos = glm::vec3(0.5f, 0.0f, 0.0f);
+
+	// test grand child
+	Node GrandChild1;
+	GrandChild1.name = "Grand child object 1";
+	GrandChild1.pos = glm::vec3(0.0f, -0.5f, 0.0f);
+
+	// grand grand child
+	Node GrandGrandChild1;
+	GrandGrandChild1.name = "Grand grand child object 1";
+	GrandGrandChild1.pos = glm::vec3(0.0f, 0.5f, 0.0f);
+
+	GrandChild1.children.push_back(GrandGrandChild1);
+
+	child1.children.push_back(GrandChild1);
+
 	rootNode.children.push_back(child1);
+
+	
+
 	Node child2;
 	child2.name = "Child object 2";
-	//child2.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
 	child2.pos = glm::vec3(0.0f, 0.0f, 0.0f);
 	rootNode.children.push_back(child2);
 	Node child3;
 	child3.name = "Child object 3";
-	//child3.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
 	child3.pos = glm::vec3(-0.5f, 0.0f, 0.0f);
 	rootNode2.children.push_back(child3);
 
 	// Parent nodes must be pushed back after all children
 	parentNodes.push_back(rootNode);	
 	parentNodes.push_back(rootNode2);
+
+	totalDecendants.push_back(child1);
+	totalDecendants.push_back(child2);
+	totalDecendants.push_back(child3);
+	totalDecendants.push_back(GrandGrandChild1);
+	totalDecendants.push_back(GrandGrandChild1);
 
 	while (!glfwWindowShouldClose(window))
 	{
